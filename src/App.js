@@ -12,37 +12,69 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const nextId = useRef(4);
-  const onInsert = (text) => {
-    const todo = {
-      id : nextId.current,
-      text : text,
-      checked : false,
-    };
-    setTodos((todos) => todos.concat(todo));
-    nextId.current++;
+
+  const onInsert = async (text) => {
+    
+    try{
+      const data = await axios.post(`http://localhost:4000/todos`, {text});
+    setTodos((todos)=> [ ...todos, data.data ]);
+
+    } catch (e) {
+      setError(e);
+    }
+    
+    // const todo = {
+    //   id : nextId.current,
+    //   text : text,
+    //   checked : false,
+    // };
+    // setTodos((todos) => todos.concat(todo));
+    // nextId.current++;
   };
 
-  const onToggle = (id) => {
+  const onToggle = async (id) => {
+    try{
+      const data = await axios.patch(`http://localhost:4000/todos/check/${id}`);
     setTodos((todos)=> 
     todos.map((todo) => 
       todo.id === id ? { ...todo, checked: !todo.checked } : todo 
     )
     );
+
+    } catch (e) {
+      setError(e);
+    }
+    
   };
   
-  const onRemove = (id) => {
-    setTodos((todos) => todos.filter((todo) => todo.id !== id))
+  const onRemove = async (id) => {
+
+    try{
+      await axios.delete(`http://localhost:4000/todos/${id}`);
+      setTodos((todos) => todos.filter((todo) => todo.id !== id))
+    } catch (e) {
+      setError(e);
+    }
+    
   };
 
   const onInsertToggle = () => {
     setInsertToggle((p) => !p);
   };
 
-  const onUpdate = (id, text) => {
-    setTodos((todos) =>
+  const onUpdate = async (id, text) => {
+
+    try{
+      await axios.patch(`http://localhost:4000/todos/${id}`);
+      setTodos((todos) =>
     todos.map((todo) => (todo.id === id ? {...todo, text } : todo ))
     );
     onInsertToggle();
+    } catch (e) {
+      setError(e);
+    }
+
+    
   };
 
   useEffect(() => {
